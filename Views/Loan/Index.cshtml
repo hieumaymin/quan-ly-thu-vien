@@ -1,0 +1,70 @@
+@model IEnumerable<MyLibraryDemo.Data.Models.Loan>
+
+<h1>Danh sách Phiếu mượn</h1>
+
+@if (TempData["Success"] != null)
+{
+    <div class="alert alert-success alert-dismissible fade show" role="alert">
+        @TempData["Success"]
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+}
+
+<p>
+    <a asp-action="Create" class="btn btn-primary">Tạo phiếu mượn mới</a>
+</p>
+
+<form asp-action="Search" method="get" class="form-inline mb-3">
+    <input type="text" name="bookTitle" class="form-control mr-2" placeholder="Tìm theo tên sách" />
+    <input type="text" name="readerName" class="form-control mr-2" placeholder="Tìm theo tên độc giả" />
+    <select name="status" class="form-control mr-2">
+        <option value="">Tất cả trạng thái</option>
+        <option value="chưa trả">Chưa trả</option>
+        <option value="đã trả">Đã trả</option>
+    </select>
+    <button type="submit" class="btn btn-secondary">Tìm kiếm</button>
+</form>
+
+<div class="table-responsive">
+    <table class="table table-bordered table-hover">
+        <thead class="table-light">
+            <tr>
+                <th>Tên sách</th>
+                <th>Độc giả</th>
+                <th>Ngày mượn</th>
+                <th>Ngày trả</th>
+                <th>Trạng thái</th>
+                <th>Thao tác</th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.Book?.Title</td>
+                    <td>@item.Reader?.Name</td>
+                    <td>@item.LoanDate.ToString("dd/MM/yyyy")</td>
+                    <td>@(item.ReturnDate?.ToString("dd/MM/yyyy") ?? "-")</td>
+                    <td>@(item.ReturnDate.HasValue ? "Đã trả" : "Chưa trả")</td>
+                    <td>
+                        @if (!item.ReturnDate.HasValue)
+                        {
+                            <a asp-action="Return" asp-route-id="@item.Id" class="btn btn-sm btn-success">Trả sách</a>
+                        }
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+</div>
+
+@section Scripts {
+    <script>
+        // Auto-hide alert after 5 seconds
+        $(document).ready(function () {
+            setTimeout(function () {
+                $(".alert").alert('close');
+            }, 5000);
+        });
+    </script>
+}

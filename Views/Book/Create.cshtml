@@ -1,0 +1,76 @@
+@model MyLibraryDemo.Data.Models.Book
+
+<h1>Thêm sách mới</h1>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Create" method="post">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="Title" class="form-label"></label> <span class="text-danger">*</span>
+                <input asp-for="Title" class="form-control" placeholder="Nhập tên sách" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="Author" class="form-label"></label> <span class="text-danger">*</span>
+                <input asp-for="Author" class="form-control" placeholder="Nhập tên tác giả" />
+                <span asp-validation-for="Author" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="PublicationYear" class="form-label"></label>
+                <input asp-for="PublicationYear" class="form-control" type="number" min="1800" max="2100" placeholder="Nhập năm xuất bản" />
+                <span asp-validation-for="PublicationYear" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mb-3">
+                <label asp-for="Description" class="form-label"></label> <span class="text-danger">*</span>
+                <textarea asp-for="Description" class="form-control" rows="4" placeholder="Nhập mô tả sách"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+            
+            <div class="form-group mt-4">
+                <button type="submit" class="btn btn-primary">
+                    <i class="bi bi-save"></i> Thêm sách
+                </button>
+                <a asp-action="Index" class="btn btn-secondary">
+                    <i class="bi bi-arrow-left"></i> Quay lại
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        $(document).ready(function () {
+            $.validator.setDefaults({
+                ignore: [],
+                errorElement: "span",
+                errorClass: "text-danger"
+            });
+
+            $("form").validate({
+                rules: {
+                    Title: "required",
+                    Author: "required",
+                    Description: "required",
+                    PublicationYear: {
+                        range: [1800, 2100]
+                    }
+                },
+                messages: {
+                    Title: "Vui lòng nhập tên sách",
+                    Author: "Vui lòng nhập tên tác giả",
+                    Description: "Vui lòng nhập mô tả sách",
+                    PublicationYear: {
+                        range: "Năm xuất bản phải từ 1800 đến 2100"
+                    }
+                }
+            });
+        });
+    </script>
+}
