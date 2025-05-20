@@ -23,6 +23,13 @@ public class ReaderController : Controller
     {
         if (ModelState.IsValid)
         {
+            // Kiểm tra email trùng lặp
+            if (await IsEmailDuplicate(reader.Email))
+            {
+                ModelState.AddModelError("Email", "Email này đã được sử dụng bởi độc giả khác.");
+                return View(reader);
+            }
+
             _context.Add(reader);
             await _context.SaveChangesAsync();
             TempData["Success"] = "Thêm độc giả mới thành công!";
@@ -48,6 +55,13 @@ public class ReaderController : Controller
         {
             try
             {
+                // Kiểm tra email trùng lặp, bỏ qua email của độc giả hiện tại
+                if (await IsEmailDuplicate(reader.Email, reader.Id))
+                {
+                    ModelState.AddModelError("Email", "Email này đã được sử dụng bởi độc giả khác.");
+                    return View(reader);
+                }
+
                 _context.Update(reader);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Cập nhật độc giả thành công!";
@@ -94,6 +108,20 @@ public class ReaderController : Controller
     }
 
     private bool ReaderExists(int id) => _context.Readers.Any(e => e.Id == id);
+
+    private async Task<bool> IsEmailDuplicate(string email, int? excludeReaderId = null)
+    {
+        if (string.IsNullOrWhiteSpace(email)) return false;
+        
+        var query = _context.Readers.Where(r => r.Email.ToLower() == email.ToLower());
+        
+        if (excludeReaderId.HasValue)
+        {
+            query = query.Where(r => r.Id != excludeReaderId.Value);
+        }
+        
+        return await query.AnyAsync();
+    }
 
     public async Task<IActionResult> Search(string searchTerm)
     {

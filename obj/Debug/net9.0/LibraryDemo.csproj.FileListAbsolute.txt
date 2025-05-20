@@ -218,3 +218,4 @@ D:\DEMO ENTITY\LibraryDemo\obj\Debug\net9.0\refint\LibraryDemo.dll
 D:\DEMO ENTITY\LibraryDemo\obj\Debug\net9.0\LibraryDemo.pdb
 D:\DEMO ENTITY\LibraryDemo\obj\Debug\net9.0\LibraryDemo.genruntimeconfig.cache
 D:\DEMO ENTITY\LibraryDemo\obj\Debug\net9.0\ref\LibraryDemo.dll
+D:\DEMO ENTITY\LibraryDemo\obj\Debug\net9.0\LibraryDemo.sourcelink.json
