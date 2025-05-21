@@ -36,6 +36,14 @@ public class BookController : Controller
         if (id == null) return NotFound();
         var book = await _context.Books.FindAsync(id);
         if (book == null) return NotFound();
+
+        // Kiểm tra xem sách có đang được mượn không
+        if (!book.IsAvailable)
+        {
+            TempData["Error"] = "Không thể sửa thông tin sách đang được mượn.";
+            return RedirectToAction(nameof(Index));
+        }
+
         return View(book);
     }
 
@@ -44,10 +52,23 @@ public class BookController : Controller
     public async Task<IActionResult> Edit(int id, [Bind("Id,Title,Author,PublicationYear,Description")] Book book)
     {
         if (id != book.Id) return NotFound();
+
+        // Kiểm tra xem sách có đang được mượn không
+        var existingBook = await _context.Books.FindAsync(id);
+        if (existingBook == null) return NotFound();
+
+        if (!existingBook.IsAvailable)
+        {
+            TempData["Error"] = "Không thể sửa thông tin sách đang được mượn.";
+            return RedirectToAction(nameof(Index));
+        }
+
         if (ModelState.IsValid)
         {
             try
             {
+                // Giữ nguyên trạng thái IsAvailable
+                book.IsAvailable = existingBook.IsAvailable;
                 _context.Update(book);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Cập nhật sách thành công!";
@@ -68,7 +89,6 @@ public class BookController : Controller
         var book = await _context.Books.FirstOrDefaultAsync(m => m.Id == id);
         if (book == null) return NotFound();
         return View(book);
-        
     }
 
     [HttpPost, ActionName("Delete")]
@@ -79,12 +99,9 @@ public class BookController : Controller
         if (book == null) return NotFound();
 
         // Kiểm tra xem sách có đang được mượn không
-        var hasActiveLoans = await _context.Loans
-            .AnyAsync(l => l.BookId == id && !l.ReturnDate.HasValue);
-
-        if (hasActiveLoans)
+        if (!book.IsAvailable)
         {
-            TempData["Error"] = "Không thể xóa sách này vì đang có người mượn.";
+            TempData["Error"] = "Không thể xóa sách đang được mượn.";
             return RedirectToAction(nameof(Index));
         }
 

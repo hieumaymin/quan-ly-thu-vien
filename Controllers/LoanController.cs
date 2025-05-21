@@ -40,12 +40,30 @@ public class LoanController : Controller
 
         try
         {
+            // Kiểm tra xem sách có sẵn không
+            var book = await _context.Books.FindAsync(loan.BookId);
+            if (book == null)
+            {
+                ModelState.AddModelError("BookId", "Không tìm thấy sách.");
+                PrepareViewBagForCreate();
+                return View(loan);
+            }
 
-            
+            if (!book.IsAvailable)
+            {
+                ModelState.AddModelError("BookId", "Sách này đang được mượn.");
+                PrepareViewBagForCreate();
+                return View(loan);
+            }
+
             if (loan.LoanDate == default)
             {
                 loan.LoanDate = DateTime.Now;
             }
+
+            // Cập nhật trạng thái sách
+            book.IsAvailable = false;
+            _context.Update(book);
 
             _context.Add(loan);
             await _context.SaveChangesAsync();
@@ -64,7 +82,10 @@ public class LoanController : Controller
 
     private void PrepareViewBagForCreate()
     {
-        var books = _context.Books.Select(b => new { b.Id, DisplayText = $"{b.Title} - {b.Author}" });
+        // Chỉ hiển thị sách có sẵn
+        var books = _context.Books
+            .Where(b => b.IsAvailable)
+            .Select(b => new { b.Id, DisplayText = $"{b.Title} - {b.Author}" });
         ViewBag.BookId = new SelectList(books, "Id", "DisplayText");
         ViewBag.ReaderId = new SelectList(_context.Readers, "Id", "Name");
     }
@@ -84,11 +105,23 @@ public class LoanController : Controller
     [ValidateAntiForgeryToken]
     public async Task<IActionResult> ReturnConfirmed(int id)
     {
-        var loan = await _context.Loans.FindAsync(id);
+        var loan = await _context.Loans
+            .Include(l => l.Book)
+            .FirstOrDefaultAsync(l => l.Id == id);
+            
         if (loan == null) return NotFound();
+
+        // Cập nhật trạng thái sách
+        if (loan.Book != null)
+        {
+            loan.Book.IsAvailable = true;
+            _context.Update(loan.Book);
+        }
+
         loan.ReturnDate = DateTime.Now;
         _context.Update(loan);
         await _context.SaveChangesAsync();
+        TempData["Success"] = "Trả sách thành công!";
         return RedirectToAction(nameof(Index));
     }
 

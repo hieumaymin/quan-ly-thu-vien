@@ -40,7 +40,7 @@
                 <th>@Html.DisplayNameFor(model => model.Title)</th>
                 <th>@Html.DisplayNameFor(model => model.Author)</th>
                 <th>@Html.DisplayNameFor(model => model.PublicationYear)</th>
-                <th>@Html.DisplayNameFor(model => model.Description)</th>
+                <th>@Html.DisplayNameFor(model => model.IsAvailable)</th>
                 <th>Thao tác</th>
             </tr>
         </thead>
@@ -51,7 +51,16 @@
                     <td>@Html.DisplayFor(modelItem => item.Title)</td>
                     <td>@Html.DisplayFor(modelItem => item.Author)</td>
                     <td>@Html.DisplayFor(modelItem => item.PublicationYear)</td>
-                    <td>@Html.DisplayFor(modelItem => item.Description)</td>
+                    <td>
+                        @if (item.IsAvailable)
+                        {
+                            <span class="badge bg-success">Có sẵn</span>
+                        }
+                        else
+                        {
+                            <span class="badge bg-danger">Đang mượn</span>
+                        }
+                    </td>
                     <td>
                         <a asp-action="Edit" asp-route-id="@item.Id" class="btn btn-sm btn-primary">
                             <i class="bi bi-pencil"></i> Sửa

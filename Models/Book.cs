@@ -24,5 +24,8 @@ namespace MyLibraryDemo.Data.Models
         [MaxLength(1000, ErrorMessage = "Mô tả không được vượt quá 1000 ký tự")]
         [Display(Name = "Mô tả")]
         public required string Description { get; set; }
+
+        [Display(Name = "Trạng thái")]
+        public bool IsAvailable { get; set; } = true;
     }
 }
