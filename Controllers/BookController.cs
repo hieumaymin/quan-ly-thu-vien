@@ -67,18 +67,22 @@ public class BookController : Controller
         {
             try
             {
-                // Giữ nguyên trạng thái IsAvailable
-                book.IsAvailable = existingBook.IsAvailable;
-                _context.Update(book);
+                // Cập nhật các thuộc tính của sách
+                existingBook.Title = book.Title;
+                existingBook.Author = book.Author;
+                existingBook.PublicationYear = book.PublicationYear;
+                existingBook.Description = book.Description;
+
+                _context.Update(existingBook);
                 await _context.SaveChangesAsync();
                 TempData["Success"] = "Cập nhật sách thành công!";
+                return RedirectToAction(nameof(Index));
             }
             catch (DbUpdateConcurrencyException)
             {
                 if (!BookExists(book.Id)) return NotFound();
                 else throw;
             }
-            return RedirectToAction(nameof(Index));
         }
         return View(book);
     }
